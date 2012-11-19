@@ -1,0 +1,69 @@
+#!/bin/sh
+
+battery_charge()
+{
+    ioreg -c AppleSmartBattery -w0 | \
+    grep -o '"[^"]*" = [^ ]*' | \
+    sed -e 's/= //g' -e 's/"//g' | \
+    sort | \
+    while read key value; do
+        case $key in
+            "MaxCapacity")
+                export maxcap=$value;;
+            "CurrentCapacity")
+                export curcap=$value;;
+        esac
+        if [[ -n "$maxcap" && -n $curcap ]]; then
+            CAPACITY=$(( 100 * curcap / maxcap))
+            printf "%d" $CAPACITY
+            break
+        fi
+    done
+}
+
+# Run Battery
+
+BATTERY_STATUS=`battery_charge`
+[ -z "$BATTERY_STATUS" ] && exit
+
+tmux=false
+
+if [ $# -eq 1 ]; then
+    if [ $1 == "tmux" ]; then
+        tmux=true
+    fi
+fi
+
+if [ $BATTERY_STATUS -ge 75 ]; then
+
+    # Green
+    case "$tmux" in
+        true) COLOR="#[fg=green]" ;;
+        false) COLOR="1;32" ;;
+    esac
+
+elif [ $BATTERY_STATUS -ge 25 ] && [ $BATTERY_STATUS -lt 75 ]; then
+
+    # Yellow
+    case "$tmux" in
+        true) COLOR="#[fg=yellow]" ;;
+        false) COLOR="1;33" ;;
+    esac
+
+elif [ $BATTERY_STATUS -lt 25 ]; then
+
+    # Red
+    case "$tmux" in
+        true) COLOR="#[fg=red]" ;;
+        false) COLOR="0;31" ;;
+    esac
+
+fi
+
+GRAPH=$(spark 0 ${BATTERY_STATUS} 100 | cut -c2)
+
+if [ "$tmux" == "false" ]; then
+    printf "\e[0;%sm %s %s \e[m\n"  "$COLOR" "[$BATTERY_STATUS%]"  "$GRAPH"
+else
+    printf "%s %s %s" "$COLOR" "[$BATTERY_STATUS%]" "$GRAPH"
+fi

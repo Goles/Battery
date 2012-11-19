@@ -17,8 +17,10 @@ Right now, battery requires [Spark](https://github.com/holman/spark) to graph yo
 ### Install
 
 #### One Liner
+(Cut & Paste on terminal to install on `/usr/bin`)
 
-``` brew install spark; curl -O https://raw.github.com/Goles/Battery/master/battery ; sudo mv battery /usr/bin; sudo chmod 755 /usr/bin/battery ```
+	brew install spark; curl -O https://raw.github.com/Goles/Battery/master/battery ; \
+	sudo mv battery /usr/bin; sudo chmod 755 /usr/bin/battery`
 
 #### Step by Step
 

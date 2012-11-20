@@ -17,7 +17,7 @@ Right now, battery requires [Spark](https://github.com/holman/spark) to graph yo
 ### Install
 
 #### One Liner
-(Cut & Paste on terminal to install on `/usr/bin`)
+(Cut & Paste on terminal to install on `/usr/bin`, btw, try to run from `~/` or other writable dir)
 
 	brew install spark; curl -O https://raw.github.com/Goles/Battery/master/battery ; \
 	sudo mv battery /usr/bin; sudo chmod 755 /usr/bin/battery
@@ -47,5 +47,7 @@ Right now, battery requires [Spark](https://github.com/holman/spark) to graph yo
 * Add the following line to your `~/.tmux.conf` file
 
 	``` set -g status-right "#(/usr/bin/battery tmux)"```
-###### You should see something like this at the bottom right corner:
+
+* restart tmux by doing `killall tmux` and running tmux again `tmux`
+###### You should now see something like this at the bottom right corner:
 ![image](http://i.imgur.com/Eaajb.png)

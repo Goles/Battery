@@ -26,36 +26,92 @@ battery_charge()
 BATTERY_STATUS=`battery_charge`
 [ -z "$BATTERY_STATUS" ] && exit
 
+while getopts ":g:m:w:o:h" opt; do
+  case $opt in
+    g)
+      if [ "$good_color" == "" ]; then
+        good_color=$OPTARG
+      fi
+      ;;
+    m)
+      if [ "$middle_color" == "" ]; then
+        middle_color=$OPTARG
+      fi
+      ;;
+    w)
+      if [ "$warn_color" == "" ]; then
+        warn_color=$OPTARG
+      fi
+      ;;
+    o)
+      if [ "$output" == "" ]; then
+        output=$OPTARG
+      fi
+      ;;
+    h)
+      echo "Usage: battery [-g good battery status color, default green/1;32] [-m middle battery status color, default yellow/1;33] [-w batttery warn color, default red/0;31] [-o specifies output use -o tmux to specify tmux status bar output]"
+      exit 0
+      ;;
+    \?)
+      echo "Invalid option: -$OPTARG"
+      exit 1
+      ;;
+    :)
+      echo "Option -$OPTARG requires an argument"
+      exit 1
+      ;;
+  esac
+done
+
 tmux=false
 
-if [ $# -eq 1 ]; then
-    if [ $1 == "tmux" ]; then
-        tmux=true
-    fi
+if [ "$output" == "tmux" ]; then
+  tmux=true
+fi
+
+if [ "$good_color" == "" ]; then
+  case "$tmux" in
+    true) good_color="green" ;;
+    false) good_color="1;32" ;;
+  esac
+fi
+
+if [ "$middle_color" == "" ]; then
+  case "$tmux" in
+    true) middle_color="yellow" ;;
+    false) middle_color="1;33" ;;
+  esac
+fi
+
+if [ "$warn_color" == "" ]; then
+  case "$tmux" in
+    true) warn_color="red" ;;
+    false) warn_color="0;31" ;;
+  esac
 fi
 
 if [ $BATTERY_STATUS -ge 75 ]; then
 
     # Green
     case "$tmux" in
-        true) COLOR="#[fg=green]" ;;
-        false) COLOR="1;32" ;;
+        true) COLOR="#[fg=$good_color]" ;;
+        false) COLOR=$good_color ;;
     esac
 
 elif [ $BATTERY_STATUS -ge 25 ] && [ $BATTERY_STATUS -lt 75 ]; then
 
     # Yellow
     case "$tmux" in
-        true) COLOR="#[fg=yellow]" ;;
-        false) COLOR="1;33" ;;
+        true) COLOR="#[fg=$middle_color]" ;;
+        false) COLOR=$middle_color ;;
     esac
 
 elif [ $BATTERY_STATUS -lt 25 ]; then
 
     # Red
     case "$tmux" in
-        true) COLOR="#[fg=red]" ;;
-        false) COLOR="0;31" ;;
+        true) COLOR="#[fg=$warn_color]" ;;
+        false) COLOR=$warn_color ;;
     esac
 
 fi

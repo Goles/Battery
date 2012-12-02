@@ -46,8 +46,13 @@ Right now, battery requires [Spark](https://github.com/holman/spark) to graph yo
 
 * Add the following line to your `~/.tmux.conf` file
 
-	``` set -g status-right "#(/usr/bin/battery tmux)"```
+	``` set -g status-right "#(/usr/bin/battery -o tmux)"```
 
 * restart tmux by doing `killall tmux` and running tmux again `tmux`
+
+### Usage (flags)
+
+You can specifiy the colors for good battery level, middle battery level, and warning battery level with the flags ``` -g -m -w ```. You should use color names for when in tmux mode and [ascii colors](http://www.termsys.demon.co.uk/vtansi.htm#colors) in terminal mode
+
 ###### You should now see something like this at the bottom right corner:
 ![image](http://i.imgur.com/Eaajb.png)

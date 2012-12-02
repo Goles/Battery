@@ -9,6 +9,7 @@ Battery is a little bash script that uses [Spark](https://github.com/holman/spar
 * Changes color to reflect battery status (Green, Yellow, Red)
 * Displays battery percentage
 * Graph bar changes it's values between 0 and 100% (thanks to spark)
+* If you don't like the default colors, you can specify the good, medium and warning battery status colors using flags (__read usage__).
 
 ### Requirements
 
@@ -55,5 +56,7 @@ Right now, battery requires [Spark](https://github.com/holman/spark) to graph yo
 
 ### Usage (flags)
 
-You can specifiy the colors for good battery level, middle battery level, and warning battery level with the flags ``` -g -m -w ```. You should use color names for when in tmux mode and [ascii colors](http://www.termsys.demon.co.uk/vtansi.htm#colors) in terminal mode.
+You can specifiy the colors for __good__ battery level, __middle__ battery level, and __warning__ battery level with the flags ``` -g -m -w ```. 
+
+__Note:__ You should use color names for when in tmux mode and [ascii colors](http://www.termsys.demon.co.uk/vtansi.htm#colors) in terminal mode.
 

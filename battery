@@ -21,10 +21,16 @@ battery_charge()
     done
 }
 
+#
 # Run Battery
+#
 
 BATTERY_STATUS=`battery_charge`
 [ -z "$BATTERY_STATUS" ] && exit
+
+#
+# Read args
+#
 
 while getopts ":g:m:w:o:h" opt; do
   case $opt in
@@ -49,7 +55,7 @@ while getopts ":g:m:w:o:h" opt; do
       fi
       ;;
     h)
-      echo "Usage: battery [-g good battery status color, default green/1;32] [-m middle battery status color, default yellow/1;33] [-w batttery warn color, default red/0;31] [-o specifies output use -o tmux to specify tmux status bar output]"
+      echo "Usage: battery [-g good battery status color, default green or 1;32] [-m middle battery status color, default yellow or 1;33] [-w warn batttery status color, default red or 0;31] [-o specifies output format, use -o tmux to specify tmux status bar format]"
       exit 0
       ;;
     \?)
@@ -68,6 +74,10 @@ tmux=false
 if [ "$output" == "tmux" ]; then
   tmux=true
 fi
+
+#
+# For default behavior when no different colors are specified
+#
 
 if [ "$good_color" == "" ]; then
   case "$tmux" in
@@ -89,6 +99,10 @@ if [ "$warn_color" == "" ]; then
     false) warn_color="0;31" ;;
   esac
 fi
+
+#
+# Apply the correct color to the battery status prompt
+#
 
 if [ $BATTERY_STATUS -ge 75 ]; then
 
@@ -115,6 +129,10 @@ elif [ $BATTERY_STATUS -lt 25 ]; then
     esac
 
 fi
+
+#
+# Print the battery status
+#
 
 GRAPH=$(spark 0 ${BATTERY_STATUS} 100 | awk '{print substr($0,4,3)}')
 

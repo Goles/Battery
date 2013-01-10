@@ -49,7 +49,7 @@ Right now, battery requires [Spark](https://github.com/holman/spark) to graph yo
 
 	``` set -g status-right "#(/usr/bin/battery -o tmux)"```
 
-* restart tmux by doing `killall tmux` and running tmux again `tmux`
+* reload the tmux config by running `tmux source-file ~/.tmux.conf`.
 
 ###### You should now see something like this at the bottom right corner:
 ![image](http://i.imgur.com/Eaajb.png)

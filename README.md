@@ -8,7 +8,7 @@ Battery is a little bash script that uses [Spark](https://github.com/holman/spar
 
 * Changes color to reflect battery status (Green, Yellow, Red)
 * Displays battery percentage
-* Graph bar changes it's values between 0 and 100% (thanks to spark)
+* Graph bar changes its values between 0 and 100% (thanks to spark)
 * If you don't like the default colors, you can specify the good, medium and warning battery status colors using flags (read usage).
 
 ### Requirements

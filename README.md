@@ -51,6 +51,10 @@ Just do (case sensitive)
 
 ### Usage (tmux)
 
+* Be sure to make tmux display utf-8 characters by running it with the `-u` flag
+
+	```tmux -u```
+
 * Add the following line to your `~/.tmux.conf` file
 
 	``` set -g status-right "#(/usr/bin/battery -o tmux)"```

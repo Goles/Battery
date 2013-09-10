@@ -34,7 +34,7 @@ setDefaults() {
 setDefaults
 
 battery_info() {
-    ioreg -c AppleSmartBattery -w0 | \
+    ioreg -n AppleSmartBattery -r | \
     grep -o '"[^"]*" = [^ ]*' | \
     sed -e 's/= //g' -e 's/"//g' | \
     sort

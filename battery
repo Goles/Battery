@@ -6,8 +6,9 @@ battery: usage:
 
   general:
     -h, --help    print this message
-    -t            output tmux status bar format
     -p            use pmset (more accurate)
+    -t            output tmux status bar format
+    -a            output ascii bar instead of spark's
 
   colors:
     -g <color>    good battery level      default: green or 1;32

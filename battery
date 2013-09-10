@@ -21,18 +21,12 @@ battery_charge()
     done
 }
 
-#
-# Run Battery
-#
-
-BATTERY_STATUS=`battery_charge`
-[ -z "$BATTERY_STATUS" ] && exit
 
 #
 # Read args
 #
 
-while getopts ":g:m:w:o:h" opt; do
+while getopts ":g:m:w:o:ph" opt; do
   case $opt in
     g)
       if [ "$good_color" == "" ]; then
@@ -54,6 +48,9 @@ while getopts ":g:m:w:o:h" opt; do
         output=$OPTARG
       fi
       ;;
+    p)
+      pmset_on=1
+      ;;
     h)
       echo "Usage: battery [-g good battery status color, default green or 1;32] [-m middle battery status color, default yellow or 1;33] [-w warn batttery status color, default red or 0;31] [-o specifies output format, use -o tmux to specify tmux status bar format]"
       exit 0
@@ -68,6 +65,15 @@ while getopts ":g:m:w:o:h" opt; do
       ;;
   esac
 done
+
+# Run Battery
+if ((pmset_on)); then
+  BATTERY_STATUS="$(pmset -g batt | grep -o '[0-9]*%' | tr -d %)"
+else
+  BATTERY_STATUS=`battery_charge`
+fi
+
+[ -z "$BATTERY_STATUS" ] && exit
 
 tmux=false
 

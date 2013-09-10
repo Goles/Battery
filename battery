@@ -28,15 +28,20 @@ setDefaults() {
   good_color="1;32"
   middle_color="1;33"
   warn_color="0;31"
+  connected=0
 }
 
 setDefaults
 
-battery_charge() {
+battery_info() {
     ioreg -c AppleSmartBattery -w0 | \
     grep -o '"[^"]*" = [^ ]*' | \
     sed -e 's/= //g' -e 's/"//g' | \
-    sort | \
+    sort
+}
+
+battery_charge() {
+    battery_info | \
     while read key value; do
         case $key in
             "MaxCapacity")
@@ -52,6 +57,13 @@ battery_charge() {
     done
 }
 
+battery_external_connected() {
+  battery_info | grep "ExternalConnected" | cut -f2 -d' '
+}
+
+if [[ ! $(battery_external_connected) = "No" ]]; then
+  connected=1
+fi
 
 # Read args
 while getopts ":g:m:w:tph" opt; do
@@ -123,7 +135,11 @@ fi
 
 
 # Print the battery status
-GRAPH=$(spark 0 ${BATTERY_STATUS} 100 | awk '{print substr($0,4,3)}')
+if ((connected)); then
+  GRAPH="⚡"
+else
+  GRAPH=$(spark 0 ${BATTERY_STATUS} 100 | awk '{print substr($0,4,3)}')
+fi
 
 if ((output_tmux)); then
     printf "%s%s %s%s" "$COLOR" "[$BATTERY_STATUS%]" "$GRAPH" "#[default]"

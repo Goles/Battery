@@ -15,6 +15,9 @@ Battery is a little bash script that uses [Spark](https://github.com/holman/spar
 
 Right now, battery requires [Spark](https://github.com/holman/spark) to graph your battery status, and only runs on __Mac OS X__.
 
+If you don't want to use Spark, you can use the `-a` flag, for ascii output:
+![image](http://i.imgur.com/w9qtQeu.png)
+
 ### Install
 
 #### Homebrew

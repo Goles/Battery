@@ -33,19 +33,19 @@ Just do (case sensitive)
 
 * Install spark ([Homebrew](https://github.com/mxcl/homebrew) on Mac OS X)
 
-	``` brew install spark``` 
-	
+	``` brew install spark```
+
 * Copy battery somewhere in your path & fix permissions
 
 	``` sudo cp battery /usr/bin ```
-	
+
 	``` sudo chmod 755 /usr/bin/battery ```
-	
+
 ### Usage (Terminal)
 
 * Run Battery (From the terminal)
 
-	``` battery ```	
+	``` battery ```
 ###### You should see something like this:
 ![image](http://i.imgur.com/SLSBg.png)
 
@@ -57,7 +57,7 @@ Just do (case sensitive)
 
 * Add the following line to your `~/.tmux.conf` file
 
-	``` set -g status-right "#(/usr/bin/battery -o tmux)"```
+	``` set -g status-right "#(/usr/bin/battery -t)"```
 
 * reload the tmux config by running `tmux source-file ~/.tmux.conf`.
 
@@ -66,7 +66,6 @@ Just do (case sensitive)
 
 ### Usage (flags)
 
-You can specifiy the colors for __good__ battery level, __middle__ battery level, and __warning__ battery level with the flags ``` -g -m -w ```. 
+You can specifiy the colors for __good__ battery level, __middle__ battery level, and __warning__ battery level with the flags ``` -g -m -w ```.
 
 __Note:__ You should use color names for when in tmux mode and [ascii colors](http://www.termsys.demon.co.uk/vtansi.htm#colors) in terminal mode.
-

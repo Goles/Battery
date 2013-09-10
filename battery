@@ -67,6 +67,73 @@ if [[ ! $(battery_external_connected) = "No" ]]; then
   connected=1
 fi
 
+
+run_battery() {
+if ((pmset_on)); then
+  BATTERY_STATUS="$(pmset -g batt | grep -o '[0-9]*%' | tr -d %)"
+else
+  BATTERY_STATUS="$(battery_charge)"
+fi
+
+[[ -z "$BATTERY_STATUS" ]] && exit 1
+}
+
+# Apply the correct color to the battery status prompt
+apply_colors() {
+# Green
+if [[ $BATTERY_STATUS -ge 75 ]]; then
+  if ((output_tmux)); then
+    COLOR="#[fg=$good_color]"
+  else
+    COLOR=$good_color
+  fi
+
+# Yellow
+elif [[ $BATTERY_STATUS -ge 25 ]] && [[ $BATTERY_STATUS -lt 75 ]]; then
+  if ((output_tmux)); then
+    COLOR="#[fg=$middle_color]"
+  else
+    COLOR=$middle_color
+  fi
+
+# Red
+elif [[ $BATTERY_STATUS -lt 25 ]]; then
+  if ((output_tmux)); then
+    COLOR="#[fg=$warn_color]"
+  else
+    COLOR=$warn_color
+  fi
+fi
+}
+
+print_status() {
+# Print the battery status
+if ((connected)); then
+  GRAPH="⚡"
+
+elif ((ascii)); then
+  barlength=${#ascii_bar}
+
+  # Divides BATTTERY_STATUS by 10 to get a decimal number; i.e 7.6
+  n=$(echo "scale = 1; $BATTERY_STATUS / 10" | bc)
+
+  # Round the number to the nearest whole number
+  rounded_n=$(printf "%.0f" "$n")
+
+  # Creates the bar
+  GRAPH=$(printf "[%-${barlength}s]" "${ascii_bar:0:rounded_n}")
+
+else
+  GRAPH=$(spark 0 ${BATTERY_STATUS} 100 | awk '{print substr($0,4,3)}')
+fi
+
+if ((output_tmux)); then
+  printf "%s%s %s%s" "$COLOR" "[$BATTERY_STATUS%]" "$GRAPH" "#[default]"
+else
+  printf "\e[0;%sm%s %s \e[m\n"  "$COLOR" "[$BATTERY_STATUS%]"  "$GRAPH"
+fi
+}
+
 # Read args
 while getopts ":g:m:w:tap" opt; do
   case $opt in
@@ -102,65 +169,7 @@ while getopts ":g:m:w:tap" opt; do
   esac
 done
 
-# Run Battery
-if ((pmset_on)); then
-  BATTERY_STATUS="$(pmset -g batt | grep -o '[0-9]*%' | tr -d %)"
-else
-  BATTERY_STATUS="$(battery_charge)"
-fi
 
-[[ -z "$BATTERY_STATUS" ]] && exit 1
-
-
-# Apply the correct color to the battery status prompt
-# Green
-if [[ $BATTERY_STATUS -ge 75 ]]; then
-  if ((output_tmux)); then
-    COLOR="#[fg=$good_color]"
-  else
-    COLOR=$good_color
-  fi
-
-# Yellow
-elif [[ $BATTERY_STATUS -ge 25 ]] && [[ $BATTERY_STATUS -lt 75 ]]; then
-  if ((output_tmux)); then
-    COLOR="#[fg=$middle_color]"
-  else
-    COLOR=$middle_color
-  fi
-
-# Red
-elif [[ $BATTERY_STATUS -lt 25 ]]; then
-  if ((output_tmux)); then
-    COLOR="#[fg=$warn_color]"
-  else
-    COLOR=$warn_color
-  fi
-fi
-
-
-# Print the battery status
-if ((connected)); then
-  GRAPH="⚡"
-
-elif ((ascii)); then
-  barlength=${#ascii_bar}
-
-  # Divides BATTTERY_STATUS by 10 to get a decimal number; i.e 7.6
-  n=$(echo "scale = 1; $BATTERY_STATUS / 10" | bc)
-
-  # Round the number to the nearest whole number
-  rounded_n=$(printf "%.0f" "$n")
-
-  # Creates the bar
-  GRAPH=$(printf "[%-${barlength}s]" "${ascii_bar:0:rounded_n}")
-
-else
-  GRAPH=$(spark 0 ${BATTERY_STATUS} 100 | awk '{print substr($0,4,3)}')
-fi
-
-if ((output_tmux)); then
-  printf "%s%s %s%s" "$COLOR" "[$BATTERY_STATUS%]" "$GRAPH" "#[default]"
-else
-  printf "\e[0;%sm%s %s \e[m\n"  "$COLOR" "[$BATTERY_STATUS%]"  "$GRAPH"
-fi
+run_battery
+apply_colors
+print_status

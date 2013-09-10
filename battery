@@ -1,7 +1,38 @@
-#!/bin/sh
+#!/bin/bash
 
-battery_charge()
-{
+usage() {
+cat <<EOF
+battery: usage:
+
+  general:
+    -h, --help    print this message
+    -t            output tmux status bar format
+    -p            use pmset (more accurate)
+
+  colors:
+    -g <color>    good battery level      default: green or 1;32
+    -m <color>    middle battery level    default: yellow or 1;33
+    -w <color>    warn battery level      default: red or 0;31
+EOF
+}
+
+if [[ $1 == '-h' || $1 == '--help' || $1 == '-?' ]]; then
+  usage
+  exit 0
+fi
+
+# For default behavior
+setDefaults() {
+  pmset_on=0
+  output_tmux=0
+  good_color="1;32"
+  middle_color="1;33"
+  warn_color="0;31"
+}
+
+setDefaults
+
+battery_charge() {
     ioreg -c AppleSmartBattery -w0 | \
     grep -o '"[^"]*" = [^ ]*' | \
     sed -e 's/= //g' -e 's/"//g' | \
@@ -21,42 +52,27 @@ battery_charge()
     done
 }
 
-#
-# Run Battery
-#
 
-BATTERY_STATUS=`battery_charge`
-[ -z "$BATTERY_STATUS" ] && exit
-
-#
 # Read args
-#
-
-while getopts ":g:m:w:o:h" opt; do
+while getopts ":g:m:w:tph" opt; do
   case $opt in
     g)
-      if [ "$good_color" == "" ]; then
-        good_color=$OPTARG
-      fi
+      good_color=$OPTARG
       ;;
     m)
-      if [ "$middle_color" == "" ]; then
-        middle_color=$OPTARG
-      fi
+      middle_color=$OPTARG
       ;;
     w)
-      if [ "$warn_color" == "" ]; then
-        warn_color=$OPTARG
-      fi
+      warn_color=$OPTARG
       ;;
-    o)
-      if [ "$output" == "" ]; then
-        output=$OPTARG
-      fi
+    t)
+      output_tmux=1
+      good_color="green"
+      middle_color="yellow"
+      warn_color="red"
       ;;
-    h)
-      echo "Usage: battery [-g good battery status color, default green or 1;32] [-m middle battery status color, default yellow or 1;33] [-w warn batttery status color, default red or 0;31] [-o specifies output format, use -o tmux to specify tmux status bar format]"
-      exit 0
+    p)
+      pmset_on=1
       ;;
     \?)
       echo "Invalid option: -$OPTARG"
@@ -69,75 +85,48 @@ while getopts ":g:m:w:o:h" opt; do
   esac
 done
 
-tmux=false
-
-if [ "$output" == "tmux" ]; then
-  tmux=true
+# Run Battery
+if ((pmset_on)); then
+  BATTERY_STATUS="$(pmset -g batt | grep -o '[0-9]*%' | tr -d %)"
+else
+  BATTERY_STATUS="$(battery_charge)"
 fi
 
-#
-# For default behavior when no different colors are specified
-#
+[[ -z "$BATTERY_STATUS" ]] && exit 1
 
-if [ "$good_color" == "" ]; then
-  case "$tmux" in
-    true) good_color="green" ;;
-    false) good_color="1;32" ;;
-  esac
-fi
 
-if [ "$middle_color" == "" ]; then
-  case "$tmux" in
-    true) middle_color="yellow" ;;
-    false) middle_color="1;33" ;;
-  esac
-fi
-
-if [ "$warn_color" == "" ]; then
-  case "$tmux" in
-    true) warn_color="red" ;;
-    false) warn_color="0;31" ;;
-  esac
-fi
-
-#
 # Apply the correct color to the battery status prompt
-#
+# Green
+if [[ $BATTERY_STATUS -ge 75 ]]; then
+  if ((output_tmux)); then
+    COLOR="#[fg=$good_color]"
+  else
+    COLOR=$good_color
+  fi
 
-if [ $BATTERY_STATUS -ge 75 ]; then
+# Yellow
+elif [[ $BATTERY_STATUS -ge 25 ]] && [[ $BATTERY_STATUS -lt 75 ]]; then
+  if ((output_tmux)); then
+    COLOR="#[fg=$middle_color]"
+  else
+    COLOR=$middle_color
+  fi
 
-    # Green
-    case "$tmux" in
-        true) COLOR="#[fg=$good_color]" ;;
-        false) COLOR=$good_color ;;
-    esac
-
-elif [ $BATTERY_STATUS -ge 25 ] && [ $BATTERY_STATUS -lt 75 ]; then
-
-    # Yellow
-    case "$tmux" in
-        true) COLOR="#[fg=$middle_color]" ;;
-        false) COLOR=$middle_color ;;
-    esac
-
-elif [ $BATTERY_STATUS -lt 25 ]; then
-
-    # Red
-    case "$tmux" in
-        true) COLOR="#[fg=$warn_color]" ;;
-        false) COLOR=$warn_color ;;
-    esac
-
+# Red
+elif [[ $BATTERY_STATUS -lt 25 ]]; then
+  if ((output_tmux)); then
+    COLOR="#[fg=$warn_color]"
+  else
+    COLOR=$warn_color
+  fi
 fi
 
-#
-# Print the battery status
-#
 
+# Print the battery status
 GRAPH=$(spark 0 ${BATTERY_STATUS} 100 | awk '{print substr($0,4,3)}')
 
-if [ "$tmux" == "false" ]; then
-    printf "\e[0;%sm%s %s \e[m\n"  "$COLOR" "[$BATTERY_STATUS%]"  "$GRAPH"
-else
+if ((output_tmux)); then
     printf "%s%s %s%s" "$COLOR" "[$BATTERY_STATUS%]" "$GRAPH" "#[default]"
+  else
+    printf "\e[0;%sm%s %s \e[m\n"  "$COLOR" "[$BATTERY_STATUS%]"  "$GRAPH"
 fi

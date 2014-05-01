@@ -44,7 +44,9 @@ Just do (case sensitive)
 
 	``` sudo chmod 755 /usr/bin/battery ```
 
-### Usage (Terminal)
+# Usage
+
+### Terminal
 
 * Run Battery (From the terminal)
 
@@ -52,7 +54,7 @@ Just do (case sensitive)
 ###### You should see something like this:
 ![image](http://i.imgur.com/SLSBg.png)
 
-### Usage (tmux)
+### tmux
 
 * Be sure to make tmux display utf-8 characters by running it with the `-u` flag
 
@@ -67,7 +69,7 @@ Just do (case sensitive)
 ###### You should now see something like this at the bottom right corner:
 ![image](http://i.imgur.com/Eaajb.png)
 
-## Usage Flags
+# Flags
 
 You can specifiy the colors for __good__ battery level, __middle__ battery level, and __warning__ battery level with the flags ``` -g -m -w ```.
 

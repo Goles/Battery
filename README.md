@@ -18,21 +18,21 @@ Right now, battery requires [Spark](https://github.com/holman/spark) to graph yo
 If you don't want to use Spark, you can use the `-a` flag, for ascii output:
 ![image](http://i.imgur.com/w9qtQeu.png)
 
-### Install
+# Install
 
-#### Homebrew
+### Homebrew
 
 Just do (case sensitive)
 
     brew tap Goles/battery
 
-#### One Liner
+### One Liner
 (Cut & Paste on terminal to install on `/usr/bin`, btw, try to run from `~/` or other writable dir)
 
 	brew install spark; curl -O https://raw.github.com/Goles/Battery/master/battery ; \
 	sudo mv battery /usr/bin; sudo chmod 755 /usr/bin/battery
 
-#### Step by Step
+### Step by Step
 
 * Install spark ([Homebrew](https://github.com/mxcl/homebrew) on Mac OS X)
 
@@ -67,7 +67,7 @@ Just do (case sensitive)
 ###### You should now see something like this at the bottom right corner:
 ![image](http://i.imgur.com/Eaajb.png)
 
-### Usage (flags)
+## Usage Flags
 
 You can specifiy the colors for __good__ battery level, __middle__ battery level, and __warning__ battery level with the flags ``` -g -m -w ```.
 

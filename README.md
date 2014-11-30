@@ -25,6 +25,7 @@ If you don't want to use Spark, you can use the `-a` flag, for ascii output:
 Just do (case sensitive)
 
     brew tap Goles/battery
+    brew install battery
 
 ### One Liner
 (Cut & Paste on terminal to install on `/usr/bin`, btw, try to run from `~/` or other writable dir)
@@ -34,7 +35,7 @@ Just do (case sensitive)
 
 ### Step by Step
 
-* Install spark ([Homebrew](https://github.com/mxcl/homebrew) on Mac OS X)
+* Install spark (with [Homebrew](https://github.com/mxcl/homebrew) on Mac OS X)
 
 	``` brew install spark```
 

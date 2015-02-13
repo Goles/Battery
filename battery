@@ -37,10 +37,18 @@ setDefaults() {
 setDefaults
 
 battery_info() {
-    ioreg -n AppleSmartBattery -r | \
-    grep -o '"[^"]*" = [^ ]*' | \
-    sed -e 's/= //g' -e 's/"//g' | \
-    sort
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        ioreg -n AppleSmartBattery -r | \
+        grep -o '"[^"]*" = [^ ]*' | \
+        sed -e 's/= //g' -e 's/"//g' | \
+        sort
+    elif [[ "$OSTYPE" == "cygwin" ]]; then
+        printf "\"CurrentCapacity\" = $(WMIC Path Win32_Battery Get EstimatedChargeRemaining | grep -o '[0-9]\{1,3\}')\n\"MaxCapacity\" = 100\n\"ExternalConnected\" = $(WMIC Path Win32_Battery Get BatteryStatus | grep -o '[0-2]' | sed -e 's/1/No/' -e 's/2/Yes/')" | \
+        grep -o '"[^"]*" = [^ ]*' | \
+	sed -e 's/= //g' -e 's/"//g' | \
+	sort
+
+    fi
 }
 
 battery_charge() {

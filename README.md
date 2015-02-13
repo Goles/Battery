@@ -13,7 +13,7 @@ Battery is a little bash script that uses [Spark](https://github.com/holman/spar
 
 ### Requirements
 
-Right now, battery requires [Spark](https://github.com/holman/spark) to graph your battery status, and only runs on __Mac OS X__.
+Right now, battery requires [Spark](https://github.com/holman/spark) to graph your battery status, and runs on __Mac OS X__ or __cygwin within Windows__.
 
 If you don't want to use Spark, you can use the `-a` flag, for ascii output:
 ![image](http://i.imgur.com/w9qtQeu.png)

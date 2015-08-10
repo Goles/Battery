@@ -70,13 +70,16 @@ fi
 
 
 run_battery() {
-if ((pmset_on)); then
-  BATTERY_STATUS="$(pmset -g batt | grep -o '[0-9]*%' | tr -d %)"
-else
-  BATTERY_STATUS="$(battery_charge)"
-fi
-
-[[ -z "$BATTERY_STATUS" ]] && exit 1
+    if [[ `uname -s` == 'Darwin' ]]; then
+        if ((pmset_on)); then
+            BATTERY_STATUS="$(pmset -g batt | grep -o '[0-9]*%' | tr -d %)"
+        else
+            BATTERY_STATUS="$(battery_charge)"
+        fi
+    elif [[ `uname -s` == 'Linux' ]]; then
+        BATTERY_STATUS="$(upower -i $(upower -e | grep BAT) | grep "percentage:" | grep -o '[0-9]*%' | tr -d '%')"
+    fi
+    [[ -z "$BATTERY_STATUS" ]] && exit 1
 }
 
 # Apply the correct color to the battery status prompt

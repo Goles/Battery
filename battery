@@ -61,7 +61,11 @@ battery_charge() {
 }
 
 battery_external_connected() {
-  battery_info | grep "ExternalConnected" | cut -f2 -d' '
+    if [[ `uname -s` == 'Darwin' ]]; then
+        battery_info | grep "ExternalConnected" | cut -f2 -d' '
+    elif [[ `uname -s` == 'Linux' ]]; then
+        upower -i $(upower -e | grep BAT) | grep "state:" | grep -o 'discharging\|charging' | (read string; if [ $string == 'charging' ]; then echo "Yes"; else echo "No"; fi)
+    fi
 }
 
 if [[ ! $(battery_external_connected) = "No" ]]; then

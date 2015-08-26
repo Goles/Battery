@@ -36,41 +36,47 @@ setDefaults() {
 
 setDefaults
 
-battery_info() {
-    ioreg -n AppleSmartBattery -r | \
-    grep -o '"[^"]*" = [^ ]*' | \
-    sed -e 's/= //g' -e 's/"//g' | \
-    sort
-}
-
 battery_charge() {
-    battery_info | \
-    while read key value; do
-        case $key in
-            "MaxCapacity")
-                export maxcap=$value;;
-            "CurrentCapacity")
-                export curcap=$value;;
-        esac
-        if [[ -n "$maxcap" && -n $curcap ]]; then
-            CAPACITY=$(( 100 * curcap / maxcap))
-            printf "%d" $CAPACITY
-            break
-        fi
-    done
+    case $(uname -s) in
+        "Darwin")
+            ioreg -n AppleSmartBattery -r | \
+            grep -o '"[^"]*" = [^ ]*' | \
+            sed -e 's/= //g' -e 's/"//g' | \
+            sort | \
+
+            while read key value; do
+                case $key in
+                    "MaxCapacity")
+                        export maxcap=$value;;
+                    "CurrentCapacity")
+                        export curcap=$value;;
+                    "ExternalConnected")
+                        if [ $value == "No" ]; then
+                            export connected=1
+                        else
+                            export connected=0
+                        fi
+                        ;;
+                esac
+                if [[ -n "$maxcap" && -n $curcap ]]; then
+                    CAPACITY=$(( 100 * curcap / maxcap))
+                    printf "%d" $CAPACITY
+                    break
+                fi
+            done
+            ;;
+        "Linux")
+            upower -i $(upower -e | grep BAT) | \
+            grep "state:" | grep -o 'discharging\|charging' | \
+            (read string; if [ '$string' == 'charging' ]; then export connected=0; else export connected=1; fi)
+            printf "%d" $(upower -i $(upower -e | grep BAT) | grep "percentage:" | grep -o '[0-9]*%' | tr -d '%')
+
+            ;;
+    esac
 }
-
-battery_external_connected() {
-  battery_info | grep "ExternalConnected" | cut -f2 -d' '
-}
-
-if [[ ! $(battery_external_connected) = "No" ]]; then
-  connected=1
-fi
-
 
 run_battery() {
-if ((pmset_on)); then
+    if ((pmset_on)) && hash pmset 2>/dev/null; then
   BATTERY_STATUS="$(pmset -g batt | grep -o '[0-9]*%' | tr -d %)"
 else
   BATTERY_STATUS="$(battery_charge)"

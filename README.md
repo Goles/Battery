@@ -13,12 +13,13 @@ Battery is a little bash script that uses [Spark](https://github.com/holman/spar
 
 ### Requirements
 
-Right now, battery requires [Spark](https://github.com/holman/spark) to graph your battery status, and only runs on __Mac OS X__.
+Right now, battery requires [Spark](https://github.com/holman/spark) to graph your battery status.
+Battery can run on both __Mac OS X__ and Linux.
 
 If you don't want to use Spark, you can use the `-a` flag, for ascii output:
 ![image](http://i.imgur.com/w9qtQeu.png)
 
-# Install
+# Install - Mac
 
 ### Homebrew
 
@@ -33,6 +34,7 @@ Just do (case sensitive)
 	brew install spark; curl -O https://raw.github.com/Goles/Battery/master/battery ; \
 	sudo mv battery /usr/bin; sudo chmod 755 /usr/bin/battery
 
+
 ### Step by Step
 
 * Install spark (with [Homebrew](https://github.com/mxcl/homebrew) on Mac OS X)
@@ -44,6 +46,34 @@ Just do (case sensitive)
 	``` sudo cp battery /usr/bin ```
 
 	``` sudo chmod 755 /usr/bin/battery ```
+
+# Install - Linux
+
+Linux support is still being tested. It ought to work properly in Debian and
+Ubuntu, but is largely untested in other distributions. Using linux requires
+`upower`, which should be included, or available, on most linux distributions.
+
+It's recommended to install this somewhere in your path that is writable,
+like `/usr/local/bin`
+
+```bash
+# if you also want to use spark
+curl -O https://raw.githubusercontent.com/holman/spark/master/spark
+mv spark /usr/local/bin
+chmod u+x /usr/local/bin/spark
+
+curl -O https://raw.githubusercontent.com/goles/battery/master/battery
+mv spark battery /usr/local/bin
+chmod u+x /usr/local/bin/battery
+```
+__NOTE:__ This `spark` is *not* the same `spark` that you would install by doing
+
+```bash
+$ sudo aptitude install spark
+```
+That is [Apache Spark](http://spark.apache.org), which is a general engine for
+large-scale data processing.
+
 
 # Usage
 
@@ -73,5 +103,5 @@ Just do (case sensitive)
 # Flags
 
 You can specifiy the colors for __good__ battery level, __middle__ battery level, and __warning__ battery level with the flags ``` -g -m -w ```.
-
 __Note:__ You should use color names for when in tmux mode and [ascii colors](http://www.termsys.demon.co.uk/vtansi.htm#colors) in terminal mode.
+In Mac OS, you can specify to use pmset with the `-p` flag; without it, the program uses `ioreg`. In linux, this flag is ignored, and always uses `upower`.

@@ -113,7 +113,11 @@ print_status() {
     if ((BATT_CONNECTED)); then
         GRAPH="⚡"
     else
-        GRAPH=$(spark 0 ${BATT_PCT} 100 | awk '{print substr($0,4,3)}')
+        if hash spark 2>/dev/null; then
+            GRAPH=$(spark 0 ${BATT_PCT} 100 | awk '{print substr($0,4,3)}')
+        else
+            ascii=1
+        fi
     fi
 
     if ((ascii)); then

@@ -63,7 +63,7 @@ mv spark /usr/local/bin
 chmod u+x /usr/local/bin/spark
 
 curl -O https://raw.githubusercontent.com/goles/battery/master/battery
-mv spark battery /usr/local/bin
+mv battery /usr/local/bin
 chmod u+x /usr/local/bin/battery
 ```
 __NOTE:__ This `spark` is *not* the same `spark` that you would install by doing

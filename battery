@@ -9,7 +9,7 @@ battery: usage:
     -p            use pmset (more accurate)
     -t            output tmux status bar format
     -a            output ascii bar instead of spark's
-
+    -b            battery path            default: /sys/class/power_supply/BAT0
   colors:
     -g <color>    good battery level      default: green or 1;32
     -m <color>    middle battery level    default: yellow or 1;33
@@ -32,6 +32,7 @@ setDefaults() {
   middle_color="1;33"
   warn_color="0;31"
   connected=0
+  battery_path=/sys/class/power_supply/BAT0
 }
 
 setDefaults
@@ -68,7 +69,6 @@ battery_charge() {
             fi
             ;;
         "Linux")
-			battery_path=/sys/class/power_supply/BAT0
 			battery_state=$(cat $battery_path/status)
 			battery_full=$battery_path/charge_full
 			battery_current=$battery_path/charge_now
@@ -148,7 +148,7 @@ fi
 }
 
 # Read args
-while getopts ":g:m:w:tap" opt; do
+while getopts ":g:m:w:tap:b:" opt; do
   case $opt in
     g)
       good_color=$OPTARG
@@ -170,6 +170,9 @@ while getopts ":g:m:w:tap" opt; do
       ;;
     p)
       pmset_on=1
+      ;;
+    b)
+      battery_path=$OPTARG
       ;;
     \?)
       echo "Invalid option: -$OPTARG"

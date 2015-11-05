@@ -119,7 +119,8 @@ print_status() {
         GRAPH="⚡"
     else
         if hash spark 2>/dev/null; then
-            GRAPH=$(spark 0 ${BATT_PCT} 100 | awk '{print substr($0,4,3)}')
+			sparks=$(spark 0 ${BATT_PCT} 100)
+			GRAPH=${sparks:1:1}
         else
             ascii=1
         fi

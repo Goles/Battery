@@ -149,7 +149,7 @@ fi
 }
 
 # Read args
-while getopts ":g:m:w:tab:" opt; do
+while getopts ":g:m:w:tab:p" opt; do
   case $opt in
     g)
       good_color=$OPTARG

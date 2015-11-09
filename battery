@@ -176,9 +176,9 @@ while getopts ":g:m:w:tab:p" opt; do
 	  if [ -d $OPTARG ]; then
 		battery_path=$OPTARG
 	  else
-		echo "Battery not found, trying to use default path..."
+		>&2 echo "Battery not found, trying to use default path..."
 	    if [ ! -d $battery_path ]; then
-		  echo "Default battery path is also unreachable"
+		  >&2 echo "Default battery path is also unreachable"
 		  exit 1
 		fi
 	  fi

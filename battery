@@ -173,7 +173,15 @@ while getopts ":g:m:w:tab:" opt; do
       pmset_on=1
       ;;
     b)
-      battery_path=$OPTARG
+	  if [ -d $OPTARG ]; then
+		battery_path=$OPTARG
+	  else
+		echo "Battery not found, trying to use default path..."
+	    if [ ! -d $battery_path ]; then
+		  echo "Default battery path is also unreachable"
+		  exit 1
+		fi
+	  fi
       ;;
     \?)
       echo "Invalid option: -$OPTARG"

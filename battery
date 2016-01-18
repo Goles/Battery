@@ -10,7 +10,7 @@ battery usage:
     -e            don't output the emoji
     -a            output ascii instead of spark
     -b            battery path            default: /sys/class/power_supply/BAT0
-    -p            use pmset (more accurate)
+    -p            use pmset (more accurate, MacOS only)
   colors:                                                 tmux     zsh
     -g <color>    good battery level      default: 1;32 | green  | 64
     -m <color>    middle battery level    default: 1;33 | yellow | 136
@@ -18,13 +18,8 @@ battery usage:
 EOF
 }
 
-if [[ $1 == '-h' || $1 == '--help' || $1 == '-?' ]]; then
-    usage
-    exit 0
-fi
-
 # For default behavior
-setDefaults() {
+set_defaults() {
     pmset_on=0
     output_tmux=0
     output_zsh=0
@@ -34,18 +29,15 @@ setDefaults() {
     good_color="1;32"
     middle_color="1;33"
     warn_color="0;31"
-    connected=0
     battery_path=/sys/class/power_supply/BAT0
 }
 
-setDefaults
-
 # Determine battery charge state
 battery_charge() {
-    case $(uname -s) in
+    case "$(uname -s)" in
         "Darwin")
             if ((pmset_on)) && command -v pmset &>/dev/null; then
-                if [ "$(pmset -g batt | grep -o 'AC Power')" ]; then
+                if [[ "$(pmset -g batt | grep -o 'AC Power')" ]]; then
                     BATT_CONNECTED=1
                 else
                     BATT_CONNECTED=0
@@ -53,7 +45,7 @@ battery_charge() {
                 BATT_PCT=$(pmset -g batt | grep -o '[0-9]*%' | tr -d %)
             else
                 while read key value; do
-                    case $key in
+                    case "$key" in
                         "MaxCapacity")
                             maxcap=$value
                             ;;
@@ -61,7 +53,7 @@ battery_charge() {
                             curcap=$value
                             ;;
                         "ExternalConnected")
-                            if [ $value == "No" ]; then
+                            if [[ "$value" == "No" ]]; then
                                 BATT_CONNECTED=0
                             else
                                 BATT_CONNECTED=1
@@ -75,26 +67,43 @@ battery_charge() {
             fi
             ;;
         "Linux")
-            case $(cat /etc/*-release) in
+            resolve_bat_state_file_prefix() {
+                local prefixes prefix
+
+                prefixes=(charge energy)
+
+                for prefix in "${prefixes[@]}"; do
+                    [[ -f "$battery_path/${prefix}_full" && -f "$battery_path/${prefix}_now" ]] && \
+                            { echo "$prefix"; return 0; }
+                done
+
+                return 1
+            }
+
+            bat_state_file_prefix=$(resolve_bat_state_file_prefix) || \
+                    { >&2 echo "Unable to find valid battery state files in [$battery_path]"; exit 1; }
+
+            battery_full=$battery_path/${bat_state_file_prefix}_full
+            battery_current=$battery_path/${bat_state_file_prefix}_now
+
+            case "$(cat /etc/*-release)" in
                 *"Arch Linux"*|*"Ubuntu"*|*"openSUSE"*)
-                    battery_state=$(cat $battery_path/energy_now)
-                    battery_full=$battery_path/energy_full
-                    battery_current=$battery_path/energy_now
+                    battery_state="$(cat "$battery_current")"
                     ;;
                 *)
-                    battery_state=$(cat $battery_path/status)
-                    battery_full=$battery_path/charge_full
-                    battery_current=$battery_path/charge_now
+                    battery_state="$(cat "$battery_path/status")"
                     ;;
             esac
-            if [ $battery_state == 'Discharging' ]; then
+
+            if [[ "$battery_state" == 'Discharging' ]]; then
                 BATT_CONNECTED=0
             else
                 BATT_CONNECTED=1
             fi
-                now=$(cat $battery_current)
-                full=$(cat $battery_full)
-                BATT_PCT=$((100 * $now / $full))
+
+            now="$(cat "$battery_current")"
+            full="$(cat "$battery_full")"
+            BATT_PCT=$((100 * now / full))
             ;;
     esac
 }
@@ -102,7 +111,7 @@ battery_charge() {
 # Apply the correct color to the battery status prompt
 apply_colors() {
     # Green
-    if [[ $BATT_PCT -ge 75 ]]; then
+    if [[ "$BATT_PCT" -ge 75 ]]; then
         if ((output_tmux)); then
             COLOR="#[fg=$good_color]"
         elif ((output_zsh)); then
@@ -112,7 +121,7 @@ apply_colors() {
         fi
 
     # Yellow
-    elif [[ $BATT_PCT -ge 25 ]] && [[ $BATT_PCT -lt 75 ]]; then
+    elif [[ "$BATT_PCT" -ge 25 && "$BATT_PCT" -lt 75 ]]; then
         if ((output_tmux)); then
             COLOR="#[fg=$middle_color]"
         elif ((output_zsh)); then
@@ -122,7 +131,7 @@ apply_colors() {
         fi
 
     # Red
-    elif [[ $BATT_PCT -lt 25 ]]; then
+    elif [[ "$BATT_PCT" -lt 25 ]]; then
         if ((output_tmux)); then
             COLOR="#[fg=$warn_color]"
         elif ((output_zsh)); then
@@ -165,9 +174,20 @@ print_status() {
     fi
 }
 
+#################
+##### Entry #####
+#################
+
+if [[ $1 == '-h' || $1 == '--help' || $1 == '-?' ]]; then
+    usage
+    exit 0
+fi
+
+set_defaults
+
 # Read args
 while getopts ":g:m:w:tzeab:p" opt; do
-    case $opt in
+    case "$opt" in
         g)
             good_color=$OPTARG
             ;;
@@ -199,11 +219,11 @@ while getopts ":g:m:w:tzeab:p" opt; do
             pmset_on=1
             ;;
         b)
-            if [ -d $OPTARG ]; then
+            if [[ -d "$OPTARG" ]]; then
                 battery_path=$OPTARG
             else
                 >&2 echo "Battery not found, trying to use default path..."
-                if [ ! -d $battery_path ]; then
+                if [[ ! -d "$battery_path" ]]; then
                     >&2 echo "Default battery path is also unreachable"
                     exit 1
                 fi

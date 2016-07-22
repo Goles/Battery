@@ -9,6 +9,7 @@ battery: usage:
     -p            use pmset (more accurate)
     -t            output tmux status bar format
     -a            output ascii bar instead of spark's
+    -e            don't output the emoji
     -b            battery path            default: /sys/class/power_supply/BAT0
   colors:
     -g <color>    good battery level      default: green or 1;32
@@ -28,6 +29,7 @@ setDefaults() {
   output_tmux=0
   ascii=0
   ascii_bar='=========='
+  emoji=1
   good_color="1;32"
   middle_color="1;33"
   warn_color="0;31"
@@ -87,9 +89,9 @@ battery_charge() {
             else
                 BATT_CONNECTED=1
             fi
-			now=$(cat $battery_current)
-			full=$(cat $battery_full)
-			BATT_PCT=$((100 * $now / $full))
+                now=$(cat $battery_current)
+                full=$(cat $battery_full)
+                BATT_PCT=$((100 * $now / $full))
             ;;
     esac
 }
@@ -125,12 +127,12 @@ fi
 
 print_status() {
 # Print the battery status
-    if ((BATT_CONNECTED)); then
+    if [[ $emoji == 1 && ((BATT_CONNECTED)) ]]; then
         GRAPH="⚡"
     else
         if hash spark 2>/dev/null; then
-			sparks=$(spark 0 ${BATT_PCT} 100)
-			GRAPH=${sparks:1:1}
+            sparks=$(spark 0 ${BATT_PCT} 100)
+            GRAPH=${sparks:1:1}
         else
             ascii=1
         fi
@@ -159,7 +161,7 @@ fi
 }
 
 # Read args
-while getopts ":g:m:w:tab:p" opt; do
+while getopts ":g:m:w:teab:p" opt; do
   case $opt in
     g)
       good_color=$OPTARG
@@ -176,6 +178,9 @@ while getopts ":g:m:w:tab:p" opt; do
       middle_color="yellow"
       warn_color="red"
       ;;
+    e)
+      emoji=0
+      ;;
     a)
       ascii=1
       ;;
@@ -183,16 +188,16 @@ while getopts ":g:m:w:tab:p" opt; do
       pmset_on=1
       ;;
     b)
-	  if [ -d $OPTARG ]; then
-		battery_path=$OPTARG
-	  else
-		>&2 echo "Battery not found, trying to use default path..."
-	    if [ ! -d $battery_path ]; then
-		  >&2 echo "Default battery path is also unreachable"
-		  exit 1
-		fi
-	  fi
-      ;;
+        if [ -d $OPTARG ]; then
+            battery_path=$OPTARG
+        else
+            >&2 echo "Battery not found, trying to use default path..."
+            if [ ! -d $battery_path ]; then
+                >&2 echo "Default battery path is also unreachable"
+                exit 1
+            fi
+        fi
+        ;;
     \?)
       echo "Invalid option: -$OPTARG"
       exit 1

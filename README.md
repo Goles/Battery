@@ -104,4 +104,6 @@ large-scale data processing.
 
 The flag `-b` will set a different battery path, the default value is `/sys/class/power_supply/BAT0`. You can specifiy the colors for __good__ battery level, __middle__ battery level, and __warning__ battery level with the flags ``` -g -m -w ```.
 __Note:__ You should use color names for when in tmux mode and [ascii colors](http://www.termsys.demon.co.uk/vtansi.htm#colors) in terminal mode.
-In Mac OS, you can specify to use pmset with the `-p` flag; without it, the program uses `ioreg`. In linux, this flag is ignored, and always uses `upower`.
+In Mac OS, you can specify to use pmset with the `-p` flag; without it, the program uses `ioreg`. In Linux, this flag is ignored, and always uses `upower`.
+
+Battery displays an emoji by default. You can disable this behaviour by passing the `-e` flag.

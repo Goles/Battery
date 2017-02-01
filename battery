@@ -141,11 +141,8 @@ print_status() {
     if ((ascii)); then
         barlength=${#ascii_bar}
 
-        # Divides BATTTERY_STATUS by 10 to get a decimal number; i.e 7.6
-        n=$(echo "scale = 1; $BATT_PCT / 10" | bc)
-
-        # Round the number to the nearest whole number
-        rounded_n=$(printf "%.0f" "$n")
+        # Battery percentage rounded to the lenght of ascii_bar
+        rounded_n=$(( $barlength * $BATT_PCT / 100 + 1))
 
         # Creates the bar
         GRAPH=$(printf "[%-${barlength}s]" "${ascii_bar:0:rounded_n}")

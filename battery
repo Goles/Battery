@@ -8,6 +8,7 @@ battery: usage:
     -h, --help    print this message
     -p            use pmset (more accurate)
     -t            output tmux status bar format
+    -z            output with zsh escape characters
     -a            output ascii bar instead of spark's
     -e            don't output the emoji
     -b            battery path            default: /sys/class/power_supply/BAT0
@@ -27,6 +28,7 @@ fi
 setDefaults() {
   pmset_on=0
   output_tmux=0
+  output_zsh=0
   ascii=0
   ascii_bar='=========='
   emoji=1
@@ -151,6 +153,8 @@ print_status() {
 
 if ((output_tmux)); then
   printf "%s%s %s%s" "$COLOR" "[$BATT_PCT%]" "$GRAPH" "#[default]"
+elif ((output_zsh)); then
+  printf "%%{\e[0;%sm%%}%s %s %%{\e[m%%}\n" "$COLOR" "[$BATT_PCT%%]" "$GRAPH"
 else
   printf "\e[0;%sm%s %s \e[m\n"  "$COLOR" "[$BATT_PCT%]"  "$GRAPH"
 fi
@@ -158,7 +162,7 @@ fi
 }
 
 # Read args
-while getopts ":g:m:w:teab:p" opt; do
+while getopts ":g:m:w:tzeab:p" opt; do
   case $opt in
     g)
       good_color=$OPTARG
@@ -174,6 +178,9 @@ while getopts ":g:m:w:teab:p" opt; do
       good_color="green"
       middle_color="yellow"
       warn_color="red"
+      ;;
+    z)
+      output_zsh=1
       ;;
     e)
       emoji=0

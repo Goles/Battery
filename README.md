@@ -107,3 +107,5 @@ __Note:__ You should use color names for when in tmux mode and [ascii colors](ht
 In Mac OS, you can specify to use pmset with the `-p` flag; without it, the program uses `ioreg`. In Linux, this flag is ignored, and always uses `upower`.
 
 Battery displays an emoji by default. You can disable this behaviour by passing the `-e` flag.
+
+The flag `-z` will add zsh escape characters to the output of the script.

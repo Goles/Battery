@@ -2,20 +2,19 @@
 
 usage() {
 cat <<EOF
-battery: usage:
-
+battery usage:
   general:
     -h, --help    print this message
-    -p            use pmset (more accurate)
     -t            output tmux status bar format
-    -z            output with zsh escape characters
-    -a            output ascii bar instead of spark's
+    -z            output zsh prompt format
     -e            don't output the emoji
+    -a            output ascii instead of spark
     -b            battery path            default: /sys/class/power_supply/BAT0
-  colors:
-    -g <color>    good battery level      default: green or 1;32
-    -m <color>    middle battery level    default: yellow or 1;33
-    -w <color>    warn battery level      default: red or 0;31
+    -p            use pmset (more accurate)
+  colors:                                                 tmux     zsh
+    -g <color>    good battery level      default: 1;32 | green  | 64
+    -m <color>    middle battery level    default: 1;33 | yellow | 136
+    -w <color>    warn battery level      default: 0;31 | red    | 160
 EOF
 }
 

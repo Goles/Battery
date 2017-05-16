@@ -129,7 +129,7 @@ fi
 
 print_status() {
 # Print the battery status
-    if [[ $emoji == 1 && ((BATT_CONNECTED)) ]]; then
+    if ((emoji)) && ((BATT_CONNECTED)); then
         GRAPH="⚡"
     else
         if hash spark 2>/dev/null; then

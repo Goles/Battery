@@ -106,6 +106,8 @@ apply_colors() {
     if [[ $BATT_PCT -ge 75 ]]; then
         if ((output_tmux)); then
             COLOR="#[fg=$good_color]"
+        elif ((output_zsh)); then
+            COLOR="%F{$good_color}"
         else
             COLOR=$good_color
         fi
@@ -114,6 +116,8 @@ apply_colors() {
     elif [[ $BATT_PCT -ge 25 ]] && [[ $BATT_PCT -lt 75 ]]; then
         if ((output_tmux)); then
             COLOR="#[fg=$middle_color]"
+        elif ((output_zsh)); then
+            COLOR="%F{$middle_color}"
         else
             COLOR=$middle_color
         fi
@@ -122,6 +126,8 @@ apply_colors() {
     elif [[ $BATT_PCT -lt 25 ]]; then
         if ((output_tmux)); then
             COLOR="#[fg=$warn_color]"
+        elif ((output_zsh)); then
+            COLOR="%F{$warn_color}"
         else
             COLOR=$warn_color
         fi
@@ -180,9 +186,9 @@ while getopts ":g:m:w:tzeab:p" opt; do
             ;;
         z)
             output_zsh=1
-            good_color="%F{64}"
-            middle_color="%F{136}"
-            warn_color="%F{160}"
+            good_color="64"
+            middle_color="136"
+            warn_color="160"
             ;;
         e)
             emoji=0

@@ -20,27 +20,28 @@ EOF
 }
 
 if [[ $1 == '-h' || $1 == '--help' || $1 == '-?' ]]; then
-  usage
-  exit 0
+    usage
+    exit 0
 fi
 
 # For default behavior
 setDefaults() {
-  pmset_on=0
-  output_tmux=0
-  output_zsh=0
-  ascii=0
-  ascii_bar='=========='
-  emoji=1
-  good_color="1;32"
-  middle_color="1;33"
-  warn_color="0;31"
-  connected=0
-  battery_path=/sys/class/power_supply/BAT0
+    pmset_on=0
+    output_tmux=0
+    output_zsh=0
+    ascii=0
+    ascii_bar='=========='
+    emoji=1
+    good_color="1;32"
+    middle_color="1;33"
+    warn_color="0;31"
+    connected=0
+    battery_path=/sys/class/power_supply/BAT0
 }
 
 setDefaults
 
+# Determine battery charge state
 battery_charge() {
     case $(uname -s) in
         "Darwin")
@@ -55,17 +56,19 @@ battery_charge() {
                 while read key value; do
                     case $key in
                         "MaxCapacity")
-                            maxcap=$value;;
+                            maxcap=$value
+                            ;;
                         "CurrentCapacity")
-                            curcap=$value;;
+                            curcap=$value
+                            ;;
                         "ExternalConnected")
                             if [ $value == "No" ]; then
                                 BATT_CONNECTED=0
                             else
                                 BATT_CONNECTED=1
                             fi
-                        ;;
-                        esac
+                            ;;
+                    esac
                     if [[ -n "$maxcap" && -n $curcap ]]; then
                         BATT_PCT=$(( 100 * curcap / maxcap))
                     fi
@@ -85,7 +88,6 @@ battery_charge() {
                     battery_current=$battery_path/charge_now
                     ;;
             esac
-
             if [ $battery_state == 'Discharging' ]; then
                 BATT_CONNECTED=0
             else
@@ -98,37 +100,36 @@ battery_charge() {
     esac
 }
 
-
 # Apply the correct color to the battery status prompt
 apply_colors() {
-# Green
-if [[ $BATT_PCT -ge 75 ]]; then
-  if ((output_tmux)); then
-    COLOR="#[fg=$good_color]"
-  else
-    COLOR=$good_color
-  fi
+    # Green
+    if [[ $BATT_PCT -ge 75 ]]; then
+        if ((output_tmux)); then
+            COLOR="#[fg=$good_color]"
+        else
+            COLOR=$good_color
+        fi
 
-# Yellow
-elif [[ $BATT_PCT -ge 25 ]] && [[ $BATT_PCT -lt 75 ]]; then
-  if ((output_tmux)); then
-    COLOR="#[fg=$middle_color]"
-  else
-    COLOR=$middle_color
-  fi
+    # Yellow
+    elif [[ $BATT_PCT -ge 25 ]] && [[ $BATT_PCT -lt 75 ]]; then
+        if ((output_tmux)); then
+            COLOR="#[fg=$middle_color]"
+        else
+            COLOR=$middle_color
+        fi
 
-# Red
-elif [[ $BATT_PCT -lt 25 ]]; then
-  if ((output_tmux)); then
-    COLOR="#[fg=$warn_color]"
-  else
-    COLOR=$warn_color
-  fi
-fi
+    # Red
+    elif [[ $BATT_PCT -lt 25 ]]; then
+        if ((output_tmux)); then
+            COLOR="#[fg=$warn_color]"
+        else
+            COLOR=$warn_color
+        fi
+    fi
 }
 
-print_status() {
 # Print the battery status
+print_status() {
     if ((emoji)) && ((BATT_CONNECTED)); then
         GRAPH="⚡"
     else
@@ -150,70 +151,68 @@ print_status() {
         GRAPH=$(printf "[%-${barlength}s]" "${ascii_bar:0:rounded_n}")
     fi
 
-
-if ((output_tmux)); then
-  printf "%s%s %s%s" "$COLOR" "[$BATT_PCT%]" "$GRAPH" "#[default]"
-elif ((output_zsh)); then
-  printf "%%B%s%s %s" "$COLOR" "[$BATT_PCT%%]" "$GRAPH"
-else
-  printf "\e[0;%sm%s %s \e[m\n"  "$COLOR" "[$BATT_PCT%]"  "$GRAPH"
-fi
-
+    if ((output_tmux)); then
+        printf "%s%s %s%s" "$COLOR" "[$BATT_PCT%]" "$GRAPH" "#[default]"
+    elif ((output_zsh)); then
+        printf "%%B%s%s %s" "$COLOR" "[$BATT_PCT%%]" "$GRAPH"
+    else
+        printf "\e[0;%sm%s %s \e[m\n"  "$COLOR" "[$BATT_PCT%]"  "$GRAPH"
+    fi
 }
 
 # Read args
 while getopts ":g:m:w:tzeab:p" opt; do
-  case $opt in
-    g)
-      good_color=$OPTARG
-      ;;
-    m)
-      middle_color=$OPTARG
-      ;;
-    w)
-      warn_color=$OPTARG
-      ;;
-    t)
-      output_tmux=1
-      good_color="green"
-      middle_color="yellow"
-      warn_color="red"
-      ;;
-    z)
-      output_zsh=1
-      good_color="%F{64}"
-      middle_color="%F{136}"
-      warn_color="%F{160}"
-      ;;
-    e)
-      emoji=0
-      ;;
-    a)
-      ascii=1
-      ;;
-    p)
-      pmset_on=1
-      ;;
-    b)
-        if [ -d $OPTARG ]; then
-            battery_path=$OPTARG
-        else
-            >&2 echo "Battery not found, trying to use default path..."
-            if [ ! -d $battery_path ]; then
-                >&2 echo "Default battery path is also unreachable"
-                exit 1
+    case $opt in
+        g)
+            good_color=$OPTARG
+            ;;
+        m)
+            middle_color=$OPTARG
+            ;;
+        w)
+            warn_color=$OPTARG
+            ;;
+        t)
+            output_tmux=1
+            good_color="green"
+            middle_color="yellow"
+            warn_color="red"
+            ;;
+        z)
+            output_zsh=1
+            good_color="%F{64}"
+            middle_color="%F{136}"
+            warn_color="%F{160}"
+            ;;
+        e)
+            emoji=0
+            ;;
+        a)
+            ascii=1
+            ;;
+        p)
+            pmset_on=1
+            ;;
+        b)
+            if [ -d $OPTARG ]; then
+                battery_path=$OPTARG
+            else
+                >&2 echo "Battery not found, trying to use default path..."
+                if [ ! -d $battery_path ]; then
+                    >&2 echo "Default battery path is also unreachable"
+                    exit 1
+                fi
             fi
-        fi
-        ;;
-    \?)
-      echo "Invalid option: -$OPTARG"
-      exit 1
-      ;;
-    :)
-      echo "Option -$OPTARG requires an argument"
-      exit 1
-      ;;
-  esac
+            ;;
+        \?)
+            echo "Invalid option: -$OPTARG"
+            exit 1
+            ;;
+        :)
+            echo "Option -$OPTARG requires an argument"
+            exit 1
+            ;;
+    esac
 done
 
 battery_charge

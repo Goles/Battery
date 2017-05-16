@@ -44,7 +44,7 @@ setDefaults
 battery_charge() {
     case $(uname -s) in
         "Darwin")
-            if ((pmset_on)) && hash pmset 2>/dev/null; then
+            if ((pmset_on)) && command -v pmset &>/dev/null; then
                 if [ "$(pmset -g batt | grep -o 'AC Power')" ]; then
                     BATT_CONNECTED=1
                 else
@@ -132,7 +132,7 @@ print_status() {
     if ((emoji)) && ((BATT_CONNECTED)); then
         GRAPH="⚡"
     else
-        if hash spark 2>/dev/null; then
+        if command -v spark &>/dev/null; then
             sparks=$(spark 0 ${BATT_PCT} 100)
             GRAPH=${sparks:1:1}
         else

@@ -154,7 +154,7 @@ print_status() {
 if ((output_tmux)); then
   printf "%s%s %s%s" "$COLOR" "[$BATT_PCT%]" "$GRAPH" "#[default]"
 elif ((output_zsh)); then
-  printf "%%{\e[0;%sm%%}%s %s %%{\e[m%%}\n" "$COLOR" "[$BATT_PCT%%]" "$GRAPH"
+  printf "%%B%s%s %s" "$COLOR" "[$BATT_PCT%%]" "$GRAPH"
 else
   printf "\e[0;%sm%s %s \e[m\n"  "$COLOR" "[$BATT_PCT%]"  "$GRAPH"
 fi
@@ -181,6 +181,9 @@ while getopts ":g:m:w:tzeab:p" opt; do
       ;;
     z)
       output_zsh=1
+      good_color="%F{64}"
+      middle_color="%F{136}"
+      warn_color="%F{160}"
       ;;
     e)
       emoji=0

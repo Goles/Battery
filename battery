@@ -9,6 +9,7 @@ battery usage:
     -z            output zsh prompt format
     -e            don't output the emoji
     -a            output ascii instead of spark
+    -c            don't output ascii charging indicator
     -b            battery path            default: /sys/class/power_supply/BAT0
     -p            use pmset (more accurate)
   colors:                                                 tmux     zsh
@@ -29,6 +30,7 @@ setDefaults() {
     output_tmux=0
     output_zsh=0
     ascii=0
+    ascii_charging=1
     ascii_bar='=========='
     emoji=1
     good_color="1;32"
@@ -147,26 +149,32 @@ print_status() {
     fi
 
     if ((ascii)); then
+        if ((ascii_charging)) && ((BATT_CONNECTED)); then
+          CHARGING="=D-"
+        else
+          CHARGING=""
+        fi
+
         barlength=${#ascii_bar}
 
         # Battery percentage rounded to the lenght of ascii_bar
         rounded_n=$(( $barlength * $BATT_PCT / 100 + 1))
 
         # Creates the bar
-        GRAPH=$(printf "[%-${barlength}s]" "${ascii_bar:0:rounded_n}")
+        GRAPH=$(printf "[%-${barlength}s]" "${ascii_bar:0:rounded_n}" )
     fi
 
     if ((output_tmux)); then
-        printf "%s%s %s%s" "$COLOR" "[$BATT_PCT%]" "$GRAPH" "#[default]"
+        printf "%s%s %s %s %s" "$COLOR" "[$BATT_PCT%]" "$GRAPH" "$CHARGING" "#[default]"
     elif ((output_zsh)); then
-        printf "%%B%s%s %s" "$COLOR" "[$BATT_PCT%%]" "$GRAPH"
+        printf "%%B%s%s %s %s" "$COLOR" "[$BATT_PCT%%]" "$GRAPH" "$CHARGING"
     else
-        printf "\e[0;%sm%s %s \e[m\n"  "$COLOR" "[$BATT_PCT%]"  "$GRAPH"
+        printf "\e[0;%sm%s %s %s \e[m\n"  "$COLOR" "[$BATT_PCT%]"  "$GRAPH" "$CHARGING"
     fi
 }
 
 # Read args
-while getopts ":g:m:w:tzeab:p" opt; do
+while getopts ":g:m:w:tzeacb:p" opt; do
     case $opt in
         g)
             good_color=$OPTARG
@@ -194,6 +202,8 @@ while getopts ":g:m:w:tzeab:p" opt; do
             ;;
         a)
             ascii=1
+            ;;
+        c)  ascii_charging=0
             ;;
         p)
             pmset_on=1

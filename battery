@@ -9,7 +9,7 @@ battery usage:
     -z            output zsh prompt format
     -e            don't output the emoji
     -a            output ascii instead of spark
-    -b            battery path            default: /sys/class/power_supply/BAT0
+    -b            battery path, list      default: /sys/class/power_supply/BAT0
     -p            use pmset (more accurate)
   colors:                                                 tmux     zsh
     -g <color>    good battery level      default: 1;32 | green  | 64
@@ -75,26 +75,18 @@ battery_charge() {
             fi
             ;;
         "Linux")
-            case $(cat /etc/*-release) in
-                *"Arch Linux"*|*"Ubuntu"*|*"openSUSE"*)
-                    battery_state=$(cat $battery_path/energy_now)
-                    battery_full=$battery_path/energy_full
-                    battery_current=$battery_path/energy_now
-                    ;;
-                *)
-                    battery_state=$(cat $battery_path/status)
-                    battery_full=$battery_path/charge_full
-                    battery_current=$battery_path/charge_now
-                    ;;
-            esac
-            if [ $battery_state == 'Discharging' ]; then
-                BATT_CONNECTED=0
-            else
-                BATT_CONNECTED=1
-            fi
-                now=$(cat $battery_current)
-                full=$(cat $battery_full)
-                BATT_PCT=$((100 * $now / $full))
+	         for battery_path in ${battery_paths[@]}; do
+                         battery_state=$(cat $battery_path/status)
+			 if [[ $battery_state == "Charging" || $battery_full == "Full" ]]; then
+		 	     BATT_CONNECTED=1
+			 fi
+                         battery_full=$battery_path/energy_full
+                         battery_current=$battery_path/energy_now
+
+			 now=$(($now + $(cat $battery_current)))
+			 full=$(($full + $(cat $battery_full)))
+	  	 done
+                 BATT_PCT=$((100 * $now / $full))
             ;;
     esac
 }
@@ -153,7 +145,7 @@ print_status() {
         rounded_n=$(( $barlength * $BATT_PCT / 100 + 1))
 
         # Creates the bar
-        GRAPH=$(printf "[%-${barlength}s]" "${ascii_bar:0:rounded_n}")
+        GRAPH=$(printf "[%-${barlength}s] %s" "${ascii_bar:0:rounded_n}" "$GRAPH")
     fi
 
     if ((output_tmux)); then
@@ -200,14 +192,10 @@ while getopts ":g:m:w:tzeab:p" opt; do
             ;;
         b)
             if [ -d $OPTARG ]; then
-                battery_path=$OPTARG
-            else
-                >&2 echo "Battery not found, trying to use default path..."
-                if [ ! -d $battery_path ]; then
-                    >&2 echo "Default battery path is also unreachable"
-                    exit 1
-                fi
-            fi
+                battery_paths+=("$OPTARG")
+	    else
+		>&2 echo "Could not find battery at path \"$OPTARG\""
+	    fi
             ;;
         \?)
             echo "Invalid option: -$OPTARG"
@@ -219,6 +207,13 @@ while getopts ":g:m:w:tzeab:p" opt; do
             ;;
     esac
 done
+if [ -z $battery_paths ]; then
+    if [ ! -d $battery_path ]; then
+        >&2 echo "Default battery path is unreachable"
+        exit 1
+    fi
+    battery_paths=("$battery_path")
+fi
 
 battery_charge
 apply_colors

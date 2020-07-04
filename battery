@@ -208,9 +208,8 @@ while getopts ":g:m:w:tzeab:p" opt; do
     esac
 done
 if [ -z $battery_paths ]; then
-    >&2 echo "Batteries not found, trying to use the default path..."
     if [ ! -d $battery_path ]; then
-        >&2 echo "Default battery path is also unreachable"
+        >&2 echo "Default battery path is unreachable"
         exit 1
     fi
     battery_paths=("$battery_path")

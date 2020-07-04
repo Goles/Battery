@@ -9,7 +9,7 @@ battery usage:
     -z            output zsh prompt format
     -e            don't output the emoji
     -a            output ascii instead of spark
-    -b            battery path            default: /sys/class/power_supply/BAT0
+    -b            battery path, list      default: /sys/class/power_supply/BAT0
     -p            use pmset (more accurate)
   colors:                                                 tmux     zsh
     -g <color>    good battery level      default: 1;32 | green  | 64
@@ -83,11 +83,6 @@ battery_charge() {
 			 now=$(($now + $(cat $battery_current)))
 			 full=$(($full + $(cat $battery_full)))
 	  	 done
-		 #if [ $battery_state == 'Discharging' ]; then
-	         #    BATT_CONNECTED=0
-		 #elif [ $battery_state == 'Charging' ] || [ $battery_state == 'Full' ]; then
-	         #    BATT_CONNECTED=1
-		 #fi
                  BATT_PCT=$((100 * $now / $full))
             ;;
     esac

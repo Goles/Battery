@@ -7,14 +7,15 @@ battery usage:
     -h, --help    print this message
     -t            output tmux status bar format
     -z            output zsh prompt format
+    -s            output screen prompt format
     -e            don't output the emoji
     -a            output ascii instead of spark
     -b            battery path            default: /sys/class/power_supply/BAT0
     -p            use pmset (more accurate)
-  colors:                                                 tmux     zsh
-    -g <color>    good battery level      default: 1;32 | green  | 64
-    -m <color>    middle battery level    default: 1;33 | yellow | 136
-    -w <color>    warn battery level      default: 0;31 | red    | 160
+  colors:                                                 tmux     zsh   screen
+    -g <color>    good battery level      default: 1;32 | green  | 64  | g
+    -m <color>    middle battery level    default: 1;33 | yellow | 136 | y
+    -w <color>    warn battery level      default: 0;31 | red    | 160 | r
 EOF
 }
 
@@ -28,6 +29,7 @@ setDefaults() {
     pmset_on=0
     output_tmux=0
     output_zsh=0
+    output_screen=0
     ascii=0
     ascii_bar='=========='
     emoji=1
@@ -107,6 +109,8 @@ apply_colors() {
             COLOR="#[fg=$good_color]"
         elif ((output_zsh)); then
             COLOR="%F{$good_color}"
+        elif ((output_screen)); then
+            COLOR="\005{$good_color}"
         else
             COLOR=$good_color
         fi
@@ -117,6 +121,8 @@ apply_colors() {
             COLOR="#[fg=$middle_color]"
         elif ((output_zsh)); then
             COLOR="%F{$middle_color}"
+        elif ((output_screen)); then
+            COLOR="\005{$middle_color}"
         else
             COLOR=$middle_color
         fi
@@ -127,6 +133,8 @@ apply_colors() {
             COLOR="#[fg=$warn_color]"
         elif ((output_zsh)); then
             COLOR="%F{$warn_color}"
+        elif ((output_screen)); then
+            COLOR="\005{$warn_color}"
         else
             COLOR=$warn_color
         fi
@@ -160,13 +168,15 @@ print_status() {
         printf "%s%s %s%s" "$COLOR" "[$BATT_PCT%]" "$GRAPH" "#[default]"
     elif ((output_zsh)); then
         printf "%%B%s%s %s" "$COLOR" "[$BATT_PCT%%]" "$GRAPH"
+    elif ((output_screen)); then
+        printf "%b %s" "$COLOR" "[$BATT_PCT%]" "$GRAPH"
     else
         printf "\e[0;%sm%s %s \e[m\n"  "$COLOR" "[$BATT_PCT%]"  "$GRAPH"
     fi
 }
 
 # Read args
-while getopts ":g:m:w:tzeab:p" opt; do
+while getopts ":g:m:w:tzseab:p" opt; do
     case $opt in
         g)
             good_color=$OPTARG
@@ -188,6 +198,12 @@ while getopts ":g:m:w:tzeab:p" opt; do
             good_color="64"
             middle_color="136"
             warn_color="160"
+            ;;
+        s)
+            output_screen=1
+            good_color="g"
+            middle_color="y"
+            warn_color="r"
             ;;
         e)
             emoji=0

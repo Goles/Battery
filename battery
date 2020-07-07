@@ -12,10 +12,10 @@ battery usage:
     -a            output ascii instead of spark
     -b            battery path            default: /sys/class/power_supply/BAT0
     -p            use pmset (more accurate)
-  colors:                                                 tmux     zsh	  screen
-    -g <color>    good battery level      default: 1;32 | green  | 64 | g
-    -m <color>    middle battery level    default: 1;33 | yellow | 136| y
-    -w <color>    warn battery level      default: 0;31 | red    | 160| r
+  colors:                                                 tmux     zsh   screen
+    -g <color>    good battery level      default: 1;32 | green  | 64  | g
+    -m <color>    middle battery level    default: 1;33 | yellow | 136 | y
+    -w <color>    warn battery level      default: 0;31 | red    | 160 | r
 EOF
 }
 

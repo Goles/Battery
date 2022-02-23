@@ -75,7 +75,7 @@ battery_charge() {
             fi
             ;;
         "Linux")
-            case $(cat /etc/*-release) in
+            case $(grep . /etc/*-release -d skip) in
                 *"Arch Linux"*|*"Ubuntu"*|*"openSUSE"*)
                     battery_state=$(cat $battery_path/energy_now)
                     battery_full=$battery_path/energy_full

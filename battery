@@ -81,6 +81,11 @@ battery_charge() {
                     battery_full=$battery_path/energy_full
                     battery_current=$battery_path/energy_now
                     ;;
+                *"elementary"*)
+                    battery_state=$(cat $battery_path/status)
+                    battery_full=$battery_path/energy_full
+                    battery_current=$battery_path/energy_now
+                    ;;
                 *)
                     battery_state=$(cat $battery_path/status)
                     battery_full=$battery_path/charge_full

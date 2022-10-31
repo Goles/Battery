@@ -34,7 +34,6 @@ setDefaults() {
     good_color="1;32"
     middle_color="1;33"
     warn_color="0;31"
-    connected=0
     battery_path=/sys/class/power_supply/BAT0
 }
 
